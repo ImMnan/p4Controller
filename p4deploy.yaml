@@ -1,17 +1,49 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: btree-claim
+  namespace: p4
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests: 
+      storage: 10Gi
+  storageClassName: standard
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: checkpointversion-claim
+  namespace: p4
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests: 
+      storage: 5Gi
+  storageClassName: standard
+---
+
 #apiVersion: v1
-#kind: PersistentVolumeClaim
+#kind: Service
 #metadata:
-#  name: btree-claim
+#  name: p4d-svc
+#  labels:
+#    app: p4d
 #  namespace: p4
 #spec:
-#  accessModes:
-#    - ReadWriteOnce
-#  resources:
-#    requests: 
-#      storage: 2Gi
-#  storageClassName: standard
-#
-#---
+#  type: LoadBalancer
+#  ports:
+#  - port: 4232
+#    name: p4d-port
+#    targetPort: 4232
+#  selector:
+#    app: p4d
+#    server: master
+#  externalTrafficPolicy: Local
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -20,7 +52,7 @@ metadata:
     app: p4d
   namespace: p4
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - port: 4232
     name: p4d-port
@@ -28,8 +60,8 @@ spec:
   selector:
     app: p4d
     server: master
-  externalTrafficPolicy: Local
-
+  
+  
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -51,9 +83,13 @@ spec:
         server: master
     spec:
       terminationGracePeriodSeconds: 5
+      securityContext:
+        runAsUser: 1337
+        runAsGroup: 1337
+        fsGroup: 1337
       containers:
       - name: p4d-ctr
-        image: immnan/p4d:0.1.6
+        image: immnan/p4d:0.2.1
         imagePullPolicy: Always
         ports:
         - containerPort: 4232
@@ -62,13 +98,16 @@ spec:
         - name: btree
           mountPath: /var/p4d-root/
         - name: checkpoint
-          mountPath: /var/checkpoint/
+          mountPath: /var/p4d-checkpoint/
         - name: version-files
-          mountPath: /var/version-files/
+          mountPath: /var/p4d-versionfiles/
       volumes:
       - name: btree
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: btree-claim
       - name: checkpoint
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: checkpointversion-claim
       - name: version-files
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: checkpointversion-claim
