@@ -89,25 +89,35 @@ spec:
         fsGroup: 1337
       containers:
       - name: p4d-ctr
-        image: immnan/p4d:0.2.1
+        image: immnan/p4d:0.2.5
         imagePullPolicy: Always
+        env:
+        - name: P4D_IP
+          value: "0.0.0.0"
+        - name: P4D_PORT
+          value: "4232"
+        - name: ROOT_DIR
+          value: "/opt/p4d-root"
+        - name: CHECKPOINT_DIR
+          value: "/opt/p4d-check/checkpoint"
+        - name: VERSION_DIR
+          value: "/opt/p4d-ver/versionfile"
         ports:
         - containerPort: 4232
           name: p4d-port
         volumeMounts:
         - name: btree
-          mountPath: /var/p4d-root/
-        - name: checkpoint
-          mountPath: /var/p4d-checkpoint/
-        - name: version-files
-          mountPath: /var/p4d-versionfiles/
+          mountPath: /opt/p4d-root/
+        - name: checkpoint-version
+          mountPath: /opt/p4d-check/
+          subPath: checkpoint
+        - name: checkpoint-version
+          mountPath: /opt/p4d-ver/
+          subPath: versionfile
       volumes:
       - name: btree
         persistentVolumeClaim:
           claimName: btree-claim
-      - name: checkpoint
-        persistentVolumeClaim:
-          claimName: checkpointversion-claim
-      - name: version-files
+      - name: checkpoint-version
         persistentVolumeClaim:
           claimName: checkpointversion-claim
