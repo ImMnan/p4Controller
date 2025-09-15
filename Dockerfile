@@ -1,9 +1,9 @@
 FROM debian:latest
 
-ENV ROOT_DIR=/opt/p4d-root
-ENV CHECKPOINT_DIR=/opt/p4d-check/checkpoint
-ENV VERSION_DIR=/opt/p4d-ver/versionfile
-ENV P4D_IP=0.0.0.0
+ENV ROOT_DIR="/opt/p4d-root"
+ENV CHECKPOINT_DIR="/opt/p4d-check/checkpoint"
+ENV VERSION_DIR="/opt/p4d-ver/versionfile"
+ENV P4D_IP=""
 ENV P4D_PORT=4232
 
 WORKDIR /usr/local/bin

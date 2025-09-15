@@ -1,67 +1,4 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: btree-claim
-  namespace: p4
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests: 
-      storage: 10Gi
-  storageClassName: standard
 
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: checkpointversion-claim
-  namespace: p4
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests: 
-      storage: 5Gi
-  storageClassName: standard
----
-
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: p4d-svc
-#  labels:
-#    app: p4d
-#  namespace: p4
-#spec:
-#  type: LoadBalancer
-#  ports:
-#  - port: 4232
-#    name: p4d-port
-#    targetPort: 4232
-#  selector:
-#    app: p4d
-#    server: master
-#  externalTrafficPolicy: Local
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: p4d-svc
-  labels:
-    app: p4d
-  namespace: p4
-spec:
-  type: ClusterIP
-  ports:
-  - port: 4232
-    name: p4d-port
-    targetPort: 4232
-  selector:
-    app: p4d
-    server: master
-  
-  
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -87,13 +24,15 @@ spec:
         runAsUser: 1337
         runAsGroup: 1337
         fsGroup: 1337
+      # If ip based setup, enable hostNetwork and use the ip in env P4D_IP  
+      # hostNetwork: true
       containers:
       - name: p4d-ctr
         image: immnan/p4d:0.2.5
         imagePullPolicy: Always
         env:
         - name: P4D_IP
-          value: "0.0.0.0"
+          value: "p4d-state-0"
         - name: P4D_PORT
           value: "4232"
         - name: ROOT_DIR
