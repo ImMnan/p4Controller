@@ -28,11 +28,9 @@ spec:
       # hostNetwork: true
       containers:
       - name: p4d-ctr
-        image: immnan/p4d:0.2.5
+        image: immnan/p4d:0.3.0
         imagePullPolicy: Always
         env:
-        - name: P4D_IP
-          value: "p4d-state-0"
         - name: P4D_PORT
           value: "4232"
         - name: ROOT_DIR

@@ -8,7 +8,6 @@ mkdir -p $VERSION_DIR
 if [ -z "$P4D_IP" ]; then
   echo "P4D_IP is not set. Using hostname"
   P4D_IP=$(hostname)
-  
 fi
 
 p4d -V
