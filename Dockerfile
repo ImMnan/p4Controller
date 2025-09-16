@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM --platform=linux/amd64 debian:latest
 
 ENV ROOT_DIR="/opt/p4d-root"
 ENV CHECKPOINT_DIR="/opt/p4d-check/checkpoint"
