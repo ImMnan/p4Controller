@@ -15,7 +15,5 @@ p4d -V
 echo "Starting p4d with IP: $P4D_IP and PORT: $P4D_PORT \n"
 
 p4d -r $ROOT_DIR -L log -p $P4D_IP:$P4D_PORT -d
-
-
 # Keep container running
 while true; do sleep 60; done 
