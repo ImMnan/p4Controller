@@ -18,6 +18,7 @@ spec:
       labels:
         app: p4d # has to match .spec.selector.matchLabels
         server: master
+        managed-by: p4controller
     spec:
       terminationGracePeriodSeconds: 5
       securityContext:
@@ -28,17 +29,21 @@ spec:
       # hostNetwork: true
       containers:
       - name: p4d-ctr
-        image: immnan/p4d:0.3.2
+        image: immnan/p4d:0.3.8
         imagePullPolicy: Always
         env:
-        - name: P4D_PORT
+        - name: SERVER_INIT
+          value: "true"
+        - name: SERVER_TYPE
+          value: "master"
+        - name: CTR_PORT
           value: "4232"
-        - name: ROOT_DIR
+        - name: P4ROOT
           value: "/opt/p4d-root"
-        - name: CHECKPOINT_DIR
-          value: "/opt/p4d-check/checkpoint"
-        - name: VERSION_DIR
-          value: "/opt/p4d-ver/versionfile"
+        - name: RUN_COMMAND
+          value: "p4d -r $P4ROOT -L log -p $P4PORT -d"
+        - name: DISTRIBUTED_CONFIG
+          value: "/path/to/config/file"
         ports:
         - containerPort: 4232
           name: p4d-port
