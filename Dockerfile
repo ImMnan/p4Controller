@@ -1,8 +1,6 @@
 FROM --platform=linux/amd64 debian:latest
 
-ENV ROOT_DIR="/opt/p4d-root"
-ENV CHECKPOINT_DIR="/opt/p4d-check/checkpoint"
-ENV VERSION_DIR="/opt/p4d-ver/versionfile"
+ENV P4ROOT="/opt/p4d-root"
 ENV CTR_IP=""
 ENV CTR_PORT=4232
 
