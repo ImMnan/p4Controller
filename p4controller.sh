@@ -19,7 +19,7 @@ if [ "$SERVER_TYPE" = "master" ]; then
 fi
 
 
-if [ "$SERVER_TYPE" = "replica" ]; then
+if [ "$SERVER_TYPE" != "master" ]; then
   while [ "$SERVER_INIT" = "false" ]; do
     echo "Waiting for p4Controller to initialize the replica server..."
     sleep 30
