@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: p4C-in-queue
+  namespace: p4
+  labels:
+    app: p4d 
+    managed-by: p4controller
+data:
+  p4deploy.yaml: |
+    apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      name: p4d-state
+      namespace: p4
+    spec:
+      selector:
+        matchLabels:
+          app: p4d # has to match .spec.template.metadata.labels
+          server: master
+      serviceName: "p4d-svc"
+      replicas: 1 # by default is 1
+      minReadySeconds: 10 # by default is 0,
+      template:
+        metadata:
+          labels:
+            app: p4d # has to match .spec.selector.matchLabels
+            server: master
+            managed-by: p4controller
+        spec:
+          terminationGracePeriodSeconds: 5
+          securityContext:
+            runAsUser: 1337
+            runAsGroup: 1337
+            fsGroup: 1337
+          # If ip based setup, enable hostNetwork and use the ip in env P4D_IP  
+          # hostNetwork: true
+          containers:
+          - name: p4d-ctr
+            image: immnan/p4d:0.3.8
+            imagePullPolicy: Always
+            env:
+            - name: SERVER_INIT
+              value: "false"
+            - name: SERVER_TYPE
+              value: "master"
+            - name: CTR_PORT
+              value: "4232"
+            - name: P4ROOT
+              value: "/opt/p4d-root"
+            - name: RUN_COMMAND
+              value: "p4d -r $P4ROOT -L log -p $P4PORT -d"
+            - name: DISTRIBUTED_CONFIG
+              value: "/path/to/config/file"
+            ports:
+            - containerPort: 4232
+              name: p4d-port
+            volumeMounts:
+            - name: btree
+              mountPath: /opt/p4d-root/
+            - name: checkpoint-version
+              mountPath: /opt/p4d-check/
+              subPath: checkpoint
+            - name: checkpoint-version
+              mountPath: /opt/p4d-ver/
+              subPath: versionfile
+          volumes:
+          - name: btree
+            persistentVolumeClaim:
+              claimName: btree-claim
+          - name: checkpoint-version
+            persistentVolumeClaim:
+              claimName: checkpointversion-claim    
