@@ -37,14 +37,12 @@ fi
 # Parent loop to check P4D_FLAG and control p4d
 while true; do
   if [ "$P4D_FLAG" = "false" ]; then
-    echo "P4D_FLAG is false. Stopping p4d with xyz command."
-    xyz # Replace 'xyz' with the actual stop command for p4d
+    echo "P4D_FLAG is false, p4Controller will stop or has stopped the p4d server."
     break
   elif [ "$P4D_FLAG" = "true" ]; then
-    echo "P4D_FLAG is true. Running RUN_COMMAND."
+    echo "P4D_FLAG is true. Re-starting p4d server."
     eval "$RUN_COMMAND"
   else
-    echo "P4D_FLAG is not set to true or false. Sleeping..."
   fi
   sleep 60
 done
