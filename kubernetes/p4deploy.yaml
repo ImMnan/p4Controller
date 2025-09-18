@@ -33,7 +33,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: SERVER_INIT
-          value: "true"
+          value: "false"
         - name: SERVER_TYPE
           value: "master"
         - name: CTR_PORT
