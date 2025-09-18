@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: p4d-svc
+  labels:
+    app: p4d
+  namespace: p4
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 4232
+    name: p4d-port
+    targetPort: 4232
+  selector:
+    app: p4d
+    server: master
+  externalTrafficPolicy: Local
+
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: p4d-svc
+#  labels:
+#    app: p4d
+#  namespace: p4
+#spec:
+#  type: ClusterIP
+#  ports:
+#  - port: 4232
+#    name: p4d-port
+#    targetPort: 4232
+#  selector:
+#    app: p4d
+#    server: master
+  
+  

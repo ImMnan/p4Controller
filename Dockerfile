@@ -1,10 +1,10 @@
-FROM debian:latest
+FROM --platform=linux/amd64 debian:latest
 
-ENV ROOT_DIR=/opt/p4d-root
-ENV CHECKPOINT_DIR=/opt/p4d-check/checkpoint
-ENV VERSION_DIR=/opt/p4d-ver/versionfile
-ENV P4D_IP=0.0.0.0
-ENV P4D_PORT=4232
+ENV ROOT_DIR="/opt/p4d-root"
+ENV CHECKPOINT_DIR="/opt/p4d-check/checkpoint"
+ENV VERSION_DIR="/opt/p4d-ver/versionfile"
+ENV CTR_IP=""
+ENV CTR_PORT=4232
 
 WORKDIR /usr/local/bin
 COPY p4controller.sh p4d p4 ./
