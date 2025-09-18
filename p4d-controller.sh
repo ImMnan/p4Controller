@@ -32,12 +32,22 @@ if [ "$SERVER_TYPE" != "master" ]; then
   eval "$RUN_COMMAND"
 fi
 
-echo "running p4 command:"
-p4 set P4PORT=$P4PORT
 # p4d -r $ROOT_DIR -L log --pid-file=/opt/p4d-root/p4d.pid -p $P4PORT -d
-while true; do sleep 60; done 
 
-
+# Parent loop to check P4D_FLAG and control p4d
+while true; do
+  if [ "$P4D_FLAG" = "false" ]; then
+    echo "P4D_FLAG is false. Stopping p4d with xyz command."
+    xyz # Replace 'xyz' with the actual stop command for p4d
+    break
+  elif [ "$P4D_FLAG" = "true" ]; then
+    echo "P4D_FLAG is true. Running RUN_COMMAND."
+    eval "$RUN_COMMAND"
+  else
+    echo "P4D_FLAG is not set to true or false. Sleeping..."
+  fi
+  sleep 60
+done
 
 # START STOP REPLICATE
 # DB UPGRADE
