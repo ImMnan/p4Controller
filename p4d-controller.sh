@@ -8,7 +8,11 @@ fi
 P4PORT=${CTR_IP}:${CTR_PORT}
 
 if [ "$SERVER_TYPE" = "master" ]; then
-  echo "Starting p4d with: $P4PORT \n"
+  while [ "$SERVER_INIT" != "true" ]; do
+    echo "Waiting for p4Controller to initialize the replica server..."
+    sleep 30
+  done
+  echo "Starting p4d commit-server with: $P4PORT \n"
   if [ -z "$RUN_COMMAND" ]; then
     echo "RUN_COMMAND is not set. Using default command"
     RUN_COMMAND="p4d -r \"$P4ROOT\" -p \"$P4PORT\" -d"
@@ -20,7 +24,7 @@ fi
 
 
 if [ "$SERVER_TYPE" != "master" ]; then
-  while [ "$SERVER_INIT" = "false" ]; do
+  while [ "$SERVER_INIT" != "true" ]; do
     echo "Waiting for p4Controller to initialize the replica server..."
     sleep 30
   done
