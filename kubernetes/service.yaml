@@ -7,6 +7,7 @@ metadata:
   namespace: p4
 spec:
   type: LoadBalancer
+  loadBalancerIP: 1.2.3.4
   ports:
   - port: 4232
     name: p4d-port
@@ -15,7 +16,7 @@ spec:
     app: p4d
     server: master
   externalTrafficPolicy: Local
-
+  
 #apiVersion: v1
 #kind: Service
 #metadata:

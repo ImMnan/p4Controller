@@ -31,6 +31,7 @@ spec:
       - name: p4d-ctr
         image: immnan/p4d:0.3.8
         imagePullPolicy: Always
+        restartPolicy: Always
         env:
         - name: SERVER_INIT
           value: "false"
