@@ -5,5 +5,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Starting P4 Controller service...")
+	fmt.Println("Starting P4d Controller service...")
+
 }
