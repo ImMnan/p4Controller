@@ -7,7 +7,7 @@ metadata:
   namespace: p4
 spec:
   type: LoadBalancer
-  loadBalancerIP: 1.2.3.4
+#  loadBalancerIP: 1.2.3.4
   ports:
   - port: 4232
     name: p4d-port

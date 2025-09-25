@@ -16,8 +16,9 @@ data:
     spec:
       selector:
         matchLabels:
-          app: p4d # has to match .spec.template.metadata.labels
+          app: p4d
           server: master
+          hostName: p4d-state-0
       serviceName: "p4d-svc"
       replicas: 1 # by default is 1
       minReadySeconds: 10 # by default is 0,
@@ -27,6 +28,7 @@ data:
             app: p4d # has to match .spec.selector.matchLabels
             server: master
             managed-by: p4controller
+            hostname: p4d-state-0
         spec:
           terminationGracePeriodSeconds: 5
           securityContext:
@@ -42,9 +44,9 @@ data:
             env:
             - name: SERVER_INIT
               value: "false"
-            - name: SERVER_TYPE
-              value: "master"
-            - name: CTR_PORT
+            - name: SERVICE_TYPE
+              value: "commit-server"
+            - name: SERVICE_PORT
               value: "4232"
             - name: P4ROOT
               value: "/opt/p4d-root"

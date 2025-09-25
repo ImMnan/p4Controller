@@ -10,9 +10,11 @@ data:
   p4Controller_config.yaml: |
     p4CSpec:
       p4d-state-0:
-        type: master
-        port: 4232
+        stsName: p4d-state
+        podType: master
+        podPort: 4232
         services: commit-server
+        type: server
         address: p4d-state-0:4232
         description: "P4D Master server"
         initConfig:
