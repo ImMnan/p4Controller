@@ -28,12 +28,17 @@ type ServerJSON struct {
 }
 
 // serversRead runs 'p4 -Mj -ztag servers', parses the JSON output, and returns a slice of ServerJSON
-func serversRead() ([]ServerJSON, error) {
+func ServersRead() ([]ServerJSON, error) {
 	// Run the p4 -Mj -ztag servers command
-	cmd := exec.Command("p4", "-Mj", "-ztag", "servers")
+	cmd := exec.Command("p4", "-u", "super", "-Mj", "-ztag", "servers")
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to run p4 command: %w", err)
+	}
+
+	// Check if the output is empty
+	if len(output) == 0 {
+		return nil, fmt.Errorf("p4 command returned no output")
 	}
 
 	// Parse the JSON output (one JSON object per line)
