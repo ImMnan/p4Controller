@@ -15,7 +15,7 @@ build:
 
 tag:
 	docker tag p4d $(IMAGE):$(VERSION)
-
+	docker tag p4c $(IMAGE):latest
 push:
 	docker push $(IMAGE):$(VERSION)
 	docker push $(IMAGE):latest
