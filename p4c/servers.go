@@ -32,18 +32,6 @@ type ServerJSON struct {
 func ServersRead() ([]ServerJSON, error) {
 
 	p4PortMaster := os.Getenv("P4PORT")
-	// Run the p4 -Mj -ztag servers command
-	infoCmd := exec.Command("p4", "-p", p4PortMaster, "info")
-	outputInfo, err := infoCmd.Output()
-	if err != nil {
-		return nil, fmt.Errorf("failed to run p4 command: %w", err)
-	}
-	// Check if the output is empty
-	if len(outputInfo) == 0 {
-		return nil, fmt.Errorf("p4 command returned no output")
-	}
-
-	fmt.Printf("Executing command: %s\n", infoCmd.String())
 
 	cmd := exec.Command("p4", "-p", p4PortMaster, "-Mj", "-ztag", "servers")
 	fmt.Printf("Executing command: %s\n", cmd.String())

@@ -51,7 +51,7 @@ spec:
         fsGroup: 1337
       containers:
       - name: p4controller-ctr
-        image: immnan/p4c:0.1.2
+        image: immnan/p4c:0.1.7
         imagePullPolicy: Always
         resources:
           requests:
@@ -65,3 +65,5 @@ spec:
           value: "34.118.233.63:4232"
         - name: WORKING_NAMESPACE
           value: "p4"
+        - name: P4PASSWD
+          value: "Bruno@1234"

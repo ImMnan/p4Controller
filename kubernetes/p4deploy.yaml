@@ -4,6 +4,9 @@ kind: StatefulSet
 metadata:
   name: p4d-state
   namespace: p4
+  labels:
+    app: p4d
+    managed-by: p4controller
 spec:
   selector:
     matchLabels:
@@ -28,7 +31,7 @@ spec:
       # hostNetwork: true
       containers:
       - name: p4d-ctr
-        image: immnan/p4d:0.4.2
+        image: immnan/p4d:0.4.3
         imagePullPolicy: Always
         env:
         - name: SERVER_INIT

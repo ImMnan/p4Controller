@@ -31,12 +31,11 @@ func getClientSet() *kubernetes.Clientset {
 	return clientset
 
 }
-
 func p4Controller() {
 	cs := getClientSet()
 	err := k8s.ConfigMapInit(cs)
 	if err != nil {
-		panic(err)
+		fmt.Println("ConfigMapInit error:", err)
 	}
 
 	chK8sToP4c := make(chan k8s.Config, 2)
@@ -47,29 +46,36 @@ func p4Controller() {
 		for {
 			k8sConfig, _, err := k8s.ConfigReader(cs)
 			if err != nil {
-				panic(err)
+				fmt.Println("ConfigReader error:", err)
+				time.Sleep(120 * time.Second)
+				continue
 			}
 			initObj, delObj, err := k8s.SyncConfig(k8sConfig, cs)
 			if err != nil {
-				panic(err)
+				fmt.Println("SyncConfig error:", err)
+				time.Sleep(120 * time.Second)
+				continue
 			}
 
 			if err := k8s.SyncState(initObj, delObj, cs); err != nil {
-				panic(err)
+				fmt.Println("SyncState error:", err)
+				time.Sleep(120 * time.Second)
+				continue
 			}
 
-			chK8sToP4c <- k8sConfig    // Send to CH2
+			chK8sToP4c <- k8sConfig // Send to CH2
+
 			SyncConfig := <-chP4cToK8s // Receive from CH2
 
 			if !SyncConfig.IsEmpty() {
 				if !IsK8sConfigEmpty(SyncConfig.InitConfig) {
 					if err := k8s.ConfigWriter(cs, SyncConfig.InitConfig); err != nil {
-						panic(err)
+						fmt.Println("ConfigWriter error:", err)
 					}
 				}
 				if !IsK8sConfigEmpty(SyncConfig.DeleteConfig) {
 					if err := k8s.ConfigDeleter(cs, SyncConfig.DeleteConfig); err != nil {
-						panic(err)
+						fmt.Println("ConfigDeleter error:", err)
 					}
 				}
 			}
@@ -84,10 +90,11 @@ func p4Controller() {
 			k8sConfig := <-chK8sToP4c // Receive from CH1
 			SyncConfig, err := syncP4Config(k8sConfig)
 			if err != nil {
-				fmt.Println(err)
-				continue
+				fmt.Println("syncP4Config error:", err)
+				chP4cToK8s <- SyncConfig // Send empty SyncConfig on error
+			} else {
+				chP4cToK8s <- SyncConfig // Send to CH1
 			}
-			chP4cToK8s <- SyncConfig // Send to CH1
 			time.Sleep(300 * time.Second)
 		}
 	}()
