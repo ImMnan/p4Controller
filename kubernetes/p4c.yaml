@@ -54,6 +54,13 @@ spec:
         image: immnan/p4c:0.1.0
         imagePullPolicy: Always
         restartPolicy: Always
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
         env:
         - name: P4PORT
           value: "34.118.233.63:4232"

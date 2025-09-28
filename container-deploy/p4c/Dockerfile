@@ -4,13 +4,11 @@ FROM --platform=linux/amd64 alpine:latest
 WORKDIR /usr/local/bin
 COPY p4controller p4 ./
 
-RUN groupadd -g 1337 p4group && \
-    useradd -u 1337 -g p4group -s /bin/sh -m p4cuser && \
-    chown p4cuser:p4group /usr/local/bin/p4controller.sh /usr/local/bin/p4 /usr/local/bin/p4d && \
-    chmod +x /usr/local/bin/p4controller.sh /usr/local/bin/p4d /usr/local/bin/p4 
-#    mkdir -p $ROOT_DIR/ $VERSION_DIR/versionfile/ $CHECKPOINT_DIR/checkpoint/ && \
-#    chown -R p4cuser:p4group $ROOT_DIR/ $VERSION_DIR/ $CHECKPOINT_DIR/
+RUN addgroup -g 1337 p4group && \
+    adduser -u 1337 -G p4group -s /bin/sh -D p4cuser && \
+    chown p4cuser:p4group /usr/local/bin/p4controller /usr/local/bin/p4 && \
+    chmod +x /usr/local/bin/p4controller /usr/local/bin/p4
 
 USER p4cuser
 
-CMD ["/usr/local/bin/p4controller.sh"]
+CMD ["/usr/local/bin/p4controller"]
