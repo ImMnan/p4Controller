@@ -1,7 +1,7 @@
 
 .PHONY: all download build tag push
 
-VERSION ?= 0.4.0
+VERSION ?= 0.4.2
 IMAGE = immnan/p4d
 
 all: download build tag push

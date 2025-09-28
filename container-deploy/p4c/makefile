@@ -1,6 +1,6 @@
 .PHONY: all download build tag push
 
-VERSION ?= 0.1.0
+VERSION ?= 0.1.2
 IMAGE = immnan/p4c
 GOOS = linux
 GOARCH = amd64

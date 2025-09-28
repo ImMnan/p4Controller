@@ -51,7 +51,7 @@ spec:
         fsGroup: 1337
       containers:
       - name: p4controller-ctr
-        image: immnan/p4c:0.1.0
+        image: immnan/p4c:0.1.1
         imagePullPolicy: Always
         resources:
           requests:
@@ -63,3 +63,5 @@ spec:
         env:
         - name: P4PORT
           value: "34.118.233.63:4232"
+        - name: WORKING_NAMESPACE
+          value: "p4"

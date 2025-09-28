@@ -32,15 +32,15 @@ spec:
         imagePullPolicy: Always
         env:
         - name: SERVER_INIT
-          value: "false"
+          value: "true"
         - name: SERVER_TYPE
           value: "master"
         - name: CTR_PORT
           value: "4232"  
         - name: P4ROOT
           value: "/opt/p4d-root"
-        - name: RUN_COMMAND
-          value: "p4d -r $P4ROOT -L log -p $P4PORT -d"
+#        - name: RUN_COMMAND
+#          value: "p4d -r $P4ROOT -L log -p $P4PORT -d"
         - name: DISTRIBUTED_CONFIG
           value: "/path/to/config/file"
         ports:
