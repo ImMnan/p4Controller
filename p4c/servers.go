@@ -13,6 +13,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 )
 
@@ -29,8 +30,24 @@ type ServerJSON struct {
 
 // serversRead runs 'p4 -Mj -ztag servers', parses the JSON output, and returns a slice of ServerJSON
 func ServersRead() ([]ServerJSON, error) {
+
+	p4PortMaster := os.Getenv("P4PORT")
 	// Run the p4 -Mj -ztag servers command
-	cmd := exec.Command("p4", "-u", "super", "-Mj", "-ztag", "servers")
+	infoCmd := exec.Command("p4", "-p", p4PortMaster, "-u", "super", "info")
+	outputInfo, err := infoCmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to run p4 command: %w", err)
+	}
+	// Check if the output is empty
+	if len(outputInfo) == 0 {
+		return nil, fmt.Errorf("p4 command returned no output")
+	}
+
+	fmt.Printf("Executing command: %s\n", infoCmd.String())
+
+	cmd := exec.Command("p4", "-p", p4PortMaster, "-u", "super", "-Mj", "-ztag", "servers")
+	fmt.Printf("Executing command: %s\n", cmd.String())
+
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to run p4 command: %w", err)

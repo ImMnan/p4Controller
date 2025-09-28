@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/immnan/p4controller/k8s"
@@ -48,8 +49,16 @@ func p4Controller() {
 			if err != nil {
 				panic(err)
 			}
-			chK8sToP4c <- k8sConfig // Send to CH2
+			initObj, delObj, err := k8s.SyncConfig(k8sConfig, cs)
+			if err != nil {
+				panic(err)
+			}
 
+			if err := k8s.SyncState(initObj, delObj, cs); err != nil {
+				panic(err)
+			}
+
+			chK8sToP4c <- k8sConfig    // Send to CH2
 			SyncConfig := <-chP4cToK8s // Receive from CH2
 
 			if !SyncConfig.IsEmpty() {
@@ -75,7 +84,8 @@ func p4Controller() {
 			k8sConfig := <-chK8sToP4c // Receive from CH1
 			SyncConfig, err := syncP4Config(k8sConfig)
 			if err != nil {
-				panic(err)
+				fmt.Println(err)
+				continue
 			}
 			chP4cToK8s <- SyncConfig // Send to CH1
 			time.Sleep(300 * time.Second)
