@@ -25,3 +25,8 @@ fi
 
 echo "Running command: $RUN_COMMAND"
 eval "$RUN_COMMAND"
+
+# Keep the container running
+while true; do
+  sleep 3600
+done
