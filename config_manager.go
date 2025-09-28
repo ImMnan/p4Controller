@@ -13,7 +13,7 @@ type SyncConfig struct {
 	InitConfig   k8s.Config
 }
 
-func syncP4Config(item []p4c.ServerJSON, config *k8s.Config) (SyncConfig, error) {
+func syncP4Config(config k8s.Config) (SyncConfig, error) {
 
 	// Matches at the Config Struct and ServerJSON.
 	// match is done with the name of the server, which is the key in the map and the Name field in the ServerJSON struct.
@@ -22,18 +22,23 @@ func syncP4Config(item []p4c.ServerJSON, config *k8s.Config) (SyncConfig, error)
 	// If the item is found in config, but missing in ServerJSON, add it to the DeleteConfig
 	// If the item is found in both, do nothing
 
+	server, err := p4c.ServersRead()
+	if err != nil {
+		return SyncConfig{}, err
+	}
+
 	result := SyncConfig{
 		DeleteConfig: k8s.Config{},
 		InitConfig:   k8s.Config{},
 	}
-
+	result.InitConfig.P4CSpec = make(map[string]k8s.ServerConfig)
 	// Build a map of ServerJSON by Name for quick lookup
 	itemMap := make(map[string]p4c.ServerJSON)
-	for _, srv := range item {
+	for _, srv := range server {
 		itemMap[srv.Name] = srv
 	}
 
-	// Find servers in item but not in config.P4CSpec (to InitConfig)
+	// Find servers in p4Servers but not in config.P4CSpec (to InitConfig)
 	for name, srv := range itemMap {
 		// Extract port from address
 		port := 0
