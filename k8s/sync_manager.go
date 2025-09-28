@@ -22,6 +22,7 @@ func SyncConfig(config Config, cs *ClientSet) (InitObj, DeleteObj, error) {
 	if err != nil {
 		return InitObj{}, DeleteObj{}, err
 	}
+	fmt.Printf("Current StatefulSets in cluster: %+v\n\n", sts)
 
 	initObj := InitObj{}
 	deleteObj := DeleteObj{}
