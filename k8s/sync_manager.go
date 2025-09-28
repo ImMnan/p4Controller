@@ -18,11 +18,6 @@ type DeleteObj struct {
 }
 
 func SyncConfig(config Config, cs *ClientSet) (InitObj, DeleteObj, error) {
-
-	// Sync the config map with the current state of the StatefulSets
-	// I think we only need to sync the stsName and PodName fields
-	// If the item exists in sts and not in config, add it to the DeleteOps
-	// If the item exists in config and not in sts, add it to the InitOps
 	sts, err := stsRead(cs)
 	if err != nil {
 		return InitObj{}, DeleteObj{}, err
@@ -31,42 +26,43 @@ func SyncConfig(config Config, cs *ClientSet) (InitObj, DeleteObj, error) {
 	initObj := InitObj{}
 	deleteObj := DeleteObj{}
 
-	// Build sets for quick lookup
+	// Build sets for quick lookup using podName and stsName as the key
 	stsSet := make(map[string]StsData) // key: stsName|podName
+	podNamesInSts := make(map[string]struct{})
 	for _, s := range sts {
 		key := s.StsName + "|" + s.PodName
 		stsSet[key] = s
+		podNamesInSts[s.PodName] = struct{}{}
 	}
 
-	configSet := make(map[string]struct {
-		PodName string
-		Config  ServerConfig
-	}) // key: stsName|podName
+	configSet := make(map[string]ServerConfig) // key: stsName|podName
 	for podName, sc := range config.P4CSpec {
 		key := sc.StsName + "|" + podName
-		configSet[key] = struct {
-			PodName string
-			Config  ServerConfig
-		}{PodName: podName, Config: sc}
+		configSet[key] = sc
 	}
 
-	// Items in sts but not in config -> DeleteOps
+	// Items in sts but not in config -> DeleteOps, unless podName exists in config
 	for key, s := range stsSet {
-		// Only add to DeleteOps if there is no config entry with matching StsName and PodName
 		if _, ok := configSet[key]; !ok {
+			if _, exists := config.P4CSpec[s.PodName]; exists {
+				// PodName exists in config, so ignore (desired state)
+				continue
+			}
 			deleteObj.Sts = append(deleteObj.Sts, s)
 		}
 	}
 
-	// Items in config but not in sts -> InitOps
-	for key, val := range configSet {
+	// Items in config but not in sts -> InitOps, unless podName exists in sts
+	for key, sc := range configSet {
 		if _, ok := stsSet[key]; !ok {
-			sc := val.Config
-			podName := val.PodName
+			if _, exists := podNamesInSts[key[len(sc.StsName)+1:]]; exists {
+				// PodName exists in sts, so ignore (desired state)
+				continue
+			}
 			initObj.Sts = append(initObj.Sts, StsData{
 				StsName:  sc.StsName,
 				PodType:  sc.PodType,
-				PodName:  podName,
+				PodName:  key[len(sc.StsName)+1:], // extract podName from key
 				PodPort:  sc.PodPort,
 				Services: sc.Services,
 				Init:     sc.InitConfig.Init,
