@@ -26,47 +26,33 @@ func SyncConfig(config Config, cs *ClientSet) (InitObj, DeleteObj, error) {
 	initObj := InitObj{}
 	deleteObj := DeleteObj{}
 
-	// Build sets for quick lookup using podName and stsName as the key
-	stsSet := make(map[string]StsData) // key: stsName|podName
-	podNamesInSts := make(map[string]struct{})
+	stsSet := make(map[string]StsData) // key: podName
 	for _, s := range sts {
-		key := s.StsName + "|" + s.PodName
-		stsSet[key] = s
-		podNamesInSts[s.PodName] = struct{}{}
+		stsSet[s.PodName] = s
 	}
 
-	configSet := make(map[string]ServerConfig) // key: stsName|podName
-	for podName, sc := range config.P4CSpec {
-		key := sc.StsName + "|" + podName
-		configSet[key] = sc
-	}
-
-	// Items in sts but not in config -> DeleteOps, unless podName exists in config
-	for key, s := range stsSet {
-		if _, ok := configSet[key]; !ok {
-			if _, exists := config.P4CSpec[s.PodName]; exists {
-				// PodName exists in config, so ignore (desired state)
-				continue
-			}
+	// Items in sts but not in config -> DeleteOps (ignore if podName exists in both)
+	for podName, s := range stsSet {
+		if _, ok := config.P4CSpec[podName]; !ok {
 			deleteObj.Sts = append(deleteObj.Sts, s)
+		} else {
+			fmt.Println("Pod exists in both config and sts, ignoring: ", podName)
 		}
 	}
 
-	// Items in config but not in sts -> InitOps, unless podName exists in sts
-	for key, sc := range configSet {
-		if _, ok := stsSet[key]; !ok {
-			if _, exists := podNamesInSts[key[len(sc.StsName)+1:]]; exists {
-				// PodName exists in sts, so ignore (desired state)
-				continue
-			}
+	// Items in config but not in sts -> InitOps (ignore if podName exists in both)
+	for podName, sc := range config.P4CSpec {
+		if _, ok := stsSet[podName]; !ok {
 			initObj.Sts = append(initObj.Sts, StsData{
 				StsName:  sc.StsName,
 				PodType:  sc.PodType,
-				PodName:  key[len(sc.StsName)+1:], // extract podName from key
+				PodName:  podName,
 				PodPort:  sc.PodPort,
 				Services: sc.Services,
 				Init:     sc.InitConfig.Init,
 			})
+		} else {
+			fmt.Println("Pod exists in both config and sts, ignoring: ", podName)
 		}
 	}
 

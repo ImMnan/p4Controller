@@ -14,14 +14,6 @@ type SyncConfig struct {
 }
 
 func syncP4Config(config k8s.Config) (SyncConfig, error) {
-
-	// Matches at the Config Struct and ServerJSON.
-	// match is done with the name of the server, which is the key in the map and the Name field in the ServerJSON struct.
-
-	// If the item is not found in config, but present in ServerJSON, add it to the InitConfig
-	// If the item is found in config, but missing in ServerJSON, add it to the DeleteConfig
-	// If the item is found in both, do nothing
-
 	server, err := p4c.ServersRead()
 	if err != nil {
 		return SyncConfig{}, err
@@ -32,24 +24,34 @@ func syncP4Config(config k8s.Config) (SyncConfig, error) {
 		InitConfig:   k8s.Config{},
 	}
 	result.InitConfig.P4CSpec = make(map[string]k8s.ServerConfig)
-	// Build a map of ServerJSON by Name for quick lookup
+
+	// Build a map of ServerJSON by Name (StatefulSet name) for quick lookup
 	itemMap := make(map[string]p4c.ServerJSON)
 	for _, srv := range server {
 		itemMap[srv.Name] = srv
 	}
 
-	// Find servers in p4Servers but not in config.P4CSpec (to InitConfig)
-	for name, srv := range itemMap {
-		// Extract port from address
-		port := 0
-		parts := strings.Split(srv.Address, ":")
-		if len(parts) == 2 {
-			if p, err := strconv.Atoi(parts[1]); err == nil {
-				port = p
+	// Find servers in ServerJSON but not in config.P4CSpec (to InitConfig)
+	for stsName, srv := range itemMap {
+		// Check if any config entry matches this stsName
+		found := false
+		for _, sc := range config.P4CSpec {
+			if sc.StsName == stsName {
+				found = true
+				break
 			}
 		}
-		if _, exists := config.P4CSpec[name]; !exists {
-			result.InitConfig.P4CSpec[name] = k8s.ServerConfig{
+		if !found {
+			// Extract port from address
+			port := 0
+			parts := strings.Split(srv.Address, ":")
+			if len(parts) == 2 {
+				if p, err := strconv.Atoi(parts[1]); err == nil {
+					port = p
+				}
+			}
+			// Use stsName as key for InitConfig
+			result.InitConfig.P4CSpec[stsName] = k8s.ServerConfig{
 				StsName:     srv.Name,
 				PodType:     srv.Services,
 				PodPort:     port,
@@ -66,18 +68,14 @@ func syncP4Config(config k8s.Config) (SyncConfig, error) {
 		}
 	}
 
-	// Find servers in config.P4CSpec but not in item (to DeleteConfig)
-	for name := range config.P4CSpec {
-		// Extract base name (before "-0")
-		baseName := name
-		if idx := strings.LastIndex(name, "-0"); idx != -1 {
-			baseName = name[:idx]
-		}
-		if _, exists := itemMap[baseName]; !exists {
+	// Find servers in config.P4CSpec but not in ServerJSON (to DeleteConfig)
+	for podName, sc := range config.P4CSpec {
+		stsName := sc.StsName
+		if _, exists := itemMap[stsName]; !exists {
 			if result.DeleteConfig.P4CSpec == nil {
 				result.DeleteConfig.P4CSpec = make(map[string]k8s.ServerConfig)
 			}
-			result.DeleteConfig.P4CSpec[name] = config.P4CSpec[name]
+			result.DeleteConfig.P4CSpec[podName] = sc
 		}
 	}
 
