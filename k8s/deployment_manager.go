@@ -134,7 +134,7 @@ func stsDeployer(cs *ClientSet, stsList []StsData) error {
 			}
 			newEnvs = append(newEnvs,
 				corev1.EnvVar{Name: "P4C_PORT", Value: fmt.Sprintf("%d", sts.PodPort)},
-				corev1.EnvVar{Name: "P4C_SERVICES", Value: sts.Services},
+				corev1.EnvVar{Name: "P4C_SERVICE", Value: sts.Services},
 				corev1.EnvVar{Name: "P4C_INIT", Value: fmt.Sprintf("%v", sts.Init)},
 			)
 			ctr.Env = newEnvs

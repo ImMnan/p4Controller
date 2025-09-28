@@ -12,7 +12,7 @@ while [ "$P4C_INIT" != "true" ]; do
   sleep 30
 done
 
-if [ "$P4C_SERVER_TYPE" = "master" ]; then
+if [ "$P4C_SERVICE" = "master" ]; then
   echo "Starting p4d commit-server with: $P4PORT"
 else
   echo "Starting replica server with: $P4PORT"
