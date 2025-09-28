@@ -33,7 +33,7 @@ func ServersRead() ([]ServerJSON, error) {
 
 	p4PortMaster := os.Getenv("P4PORT")
 	// Run the p4 -Mj -ztag servers command
-	infoCmd := exec.Command("p4", "-p", p4PortMaster, "-u", "super", "info")
+	infoCmd := exec.Command("p4", "-p", p4PortMaster, "info")
 	outputInfo, err := infoCmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to run p4 command: %w", err)
@@ -45,7 +45,7 @@ func ServersRead() ([]ServerJSON, error) {
 
 	fmt.Printf("Executing command: %s\n", infoCmd.String())
 
-	cmd := exec.Command("p4", "-p", p4PortMaster, "-u", "super", "-Mj", "-ztag", "servers")
+	cmd := exec.Command("p4", "-p", p4PortMaster, "-Mj", "-ztag", "servers")
 	fmt.Printf("Executing command: %s\n", cmd.String())
 
 	output, err := cmd.Output()
@@ -67,6 +67,11 @@ func ServersRead() ([]ServerJSON, error) {
 			return nil, fmt.Errorf("failed to decode JSON: %w", err)
 		}
 		servers = append(servers, server)
+	}
+
+	// Print the parsed servers to the terminal
+	for i, s := range servers {
+		fmt.Printf("Server %d: %+v\n", i+1, s)
 	}
 
 	return servers, nil
