@@ -34,18 +34,18 @@ spec:
         image: immnan/p4d:0.4.3
         imagePullPolicy: Always
         env:
-        - name: SERVER_INIT
+        - name: P4C_INIT
           value: "true"
-        - name: SERVER_TYPE
+        - name: P4C_SERVER_TYPE
           value: "master"
-        - name: CTR_PORT
+        - name: P4C_PORT
           value: "4232"  
         - name: P4ROOT
           value: "/opt/p4d-root"
-#        - name: RUN_COMMAND
+#        - name: P4C_RUN_COMMAND
 #          value: "p4d -r $P4ROOT -L log -p $P4PORT -d"
-        - name: DISTRIBUTED_CONFIG
-          value: "/path/to/config/file"
+#        - name: DISTRIBUTED_CONFIG
+#          value: "/path/to/config/file"
         ports:
         - containerPort: 4232
           name: p4d-port
