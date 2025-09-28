@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p4controller
+  namespace: p4
+spec:
+  selector:
+    matchLabels:
+      app: p4controller 
+  replicas: 1         
+  template:
+    metadata:
+      labels:
+        app: p4controller 
+    spec:
+      terminationGracePeriodSeconds: 5
+      securityContext:
+        runAsUser: 1337
+        runAsGroup: 1337
+        fsGroup: 1337
+      containers:
+      - name: p4controller-ctr
+        image: immnan/p4c:0.1.0
+        imagePullPolicy: Always
+        restartPolicy: Always
+        env:
+        - name: P4PORT
+          value: "34.118.233.63:4232"

@@ -37,7 +37,7 @@ spec:
         - name: SERVER_TYPE
           value: "master"
         - name: CTR_PORT
-          value: "4232"
+          value: "4232"  
         - name: P4ROOT
           value: "/opt/p4d-root"
         - name: RUN_COMMAND
