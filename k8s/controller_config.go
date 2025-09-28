@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -40,7 +41,7 @@ type CtrMount struct {
 // This package function will be responsible for configuring the config map of the controller
 // READ, WRITE & SYNC
 
-func configMapInit(cs *ClientSet) error {
+func ConfigMapInit(cs *ClientSet) error {
 	// Initialize the config map
 	configMapName := os.Getenv("CONTROLLER_CM_NAME")
 	if configMapName == "" {
@@ -50,22 +51,19 @@ func configMapInit(cs *ClientSet) error {
 	if ns == "" {
 		ns = "default"
 	}
-	cmName, err := cs.clientset.CoreV1().ConfigMaps(ns).Get(configMapName, metav1.GetOptions{})
+	_, err := cs.CoreV1().ConfigMaps(ns).Get(context.TODO(), configMapName, metav1.GetOptions{})
 	if err != nil {
 		// If the config map doesn't exist, create it
 		fmt.Println("configMap not found, exiting")
 		return err
 	}
-	if cmName == configMapName {
-		// If the config map exists, read it
-		// exit the function successfully
-		fmt.Println("configMap found.")
-		return nil
-	}
+	// If the config map exists, read it
+	// exit the function successfully
+	fmt.Println("configMap found.")
 	return nil
 }
 
-func configReader(cs *ClientSet) (Config, *v1.ConfigMap, error) {
+func ConfigReader(cs *ClientSet) (Config, *v1.ConfigMap, error) {
 	var config Config
 	ns := os.Getenv("WORKING_NAMESPACE")
 	if ns == "" {
@@ -76,7 +74,7 @@ func configReader(cs *ClientSet) (Config, *v1.ConfigMap, error) {
 		configMapName = "p4controller-cm"
 	}
 	// Get the existing config map
-	cm, err := cs.clientset.CoreV1().ConfigMaps(ns).Get(configMapName, metav1.GetOptions{})
+	cm, err := cs.CoreV1().ConfigMaps(ns).Get(context.TODO(), configMapName, metav1.GetOptions{})
 	if err != nil {
 		fmt.Println("Error getting config map:", err)
 		return Config{}, nil, err
@@ -86,19 +84,19 @@ func configReader(cs *ClientSet) (Config, *v1.ConfigMap, error) {
 		fmt.Println("Config file not found in config map")
 		return Config{}, nil, fmt.Errorf("config file not found in config map")
 	}
-	if err := yaml.Unmarshal(content, &config); err != nil {
+	if err := yaml.Unmarshal([]byte(content), &config); err != nil {
 		fmt.Println("Error parsing config file:", err)
 		return Config{}, nil, err
 	}
 	return config, cm, nil
 }
 
-func configWriter(cs *ClientSet, config Config) {
+func ConfigWriter(cs *ClientSet, config Config) error {
 	// Read the existing config and configmap
-	cfg, cm, err := configReader(cs)
+	cfg, cm, err := ConfigReader(cs)
 	if err != nil {
 		fmt.Println("Error reading existing config:", err)
-		return
+		return err
 	}
 	ns := os.Getenv("WORKING_NAMESPACE")
 	if ns == "" {
@@ -117,32 +115,33 @@ func configWriter(cs *ClientSet, config Config) {
 	yamlData, err := yaml.Marshal(&cfg)
 	if err != nil {
 		fmt.Println("Error marshaling config to YAML:", err)
-		return
+		return err
 	}
 
 	// Update the data field
 	cm.Data["p4Controller_config.yaml"] = string(yamlData)
 
 	// Update the config map in Kubernetes
-	_, err = cs.clientset.CoreV1().ConfigMaps(ns).Update(cm)
+	_, err = cs.CoreV1().ConfigMaps(ns).Update(context.TODO(), cm, metav1.UpdateOptions{})
 	if err != nil {
 		fmt.Println("Error updating config map:", err)
-		return
+		return err
 	}
 
 	fmt.Println("Config map updated successfully.")
+	return nil
 }
 
-func configDeleter(cs *ClientSet, config Config) error {
+func ConfigDeleter(cs *ClientSet, config Config) error {
 	ns := os.Getenv("WORKING_NAMESPACE")
 	if ns == "" {
 		ns = "default"
 	}
 
-	cfg, cm, err := configReader(cs)
+	cfg, cm, err := ConfigReader(cs)
 	if err != nil {
 		fmt.Println("Error reading existing config:", err)
-		return
+		return err
 	}
 
 	content, ok := cm.Data["p4Controller_config.yaml"]
@@ -171,7 +170,7 @@ func configDeleter(cs *ClientSet, config Config) error {
 	cm.Data["p4Controller_config.yaml"] = string(yamlData)
 
 	// Update the config map in Kubernetes
-	_, err = cs.clientset.CoreV1().ConfigMaps(ns).Update(cm)
+	_, err = cs.CoreV1().ConfigMaps(ns).Update(context.TODO(), cm, metav1.UpdateOptions{})
 	if err != nil {
 		fmt.Println("Error updating config map:", err)
 		return err

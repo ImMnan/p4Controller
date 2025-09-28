@@ -34,7 +34,7 @@ func stsRead(cs *ClientSet) (sts []StsData, err error) {
 	// List StatefulSets with label selectors
 
 	labelSelector := "app=p4d,managed-by=p4controller"
-	stss, err := cs.clientset.AppsV1().StatefulSets(ns).List(metav1.ListOptions{
+	stss, err := cs.AppsV1().StatefulSets(ns).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})
 	if err != nil {
@@ -171,7 +171,7 @@ func stsDeployer(cs *ClientSet, stsList []StsData) error {
 		}
 
 		// Create the StatefulSet
-		_, err := cs.clientset.AppsV1().StatefulSets(ns).Create(
+		_, err := cs.AppsV1().StatefulSets(ns).Create(
 			context.Background(),
 			&statefulSet,
 			metav1.CreateOptions{},
@@ -182,6 +182,28 @@ func stsDeployer(cs *ClientSet, stsList []StsData) error {
 				continue
 			}
 			return fmt.Errorf("failed to create StatefulSet %s: %w", sts.StsName, err)
+		}
+	}
+	return nil
+}
+
+func stsDeleter(cs *ClientSet, stsList []StsData) error {
+	ns := os.Getenv("WORKING_NAMESPACE")
+	if ns == "" {
+		ns = "default"
+	}
+	for _, sts := range stsList {
+		err := cs.AppsV1().StatefulSets(ns).Delete(
+			context.Background(),
+			sts.StsName,
+			metav1.DeleteOptions{},
+		)
+		if err != nil {
+			// If not found, skip
+			if strings.Contains(err.Error(), "not found") {
+				continue
+			}
+			return fmt.Errorf("failed to delete StatefulSet %s: %w", sts.StsName, err)
 		}
 	}
 	return nil
