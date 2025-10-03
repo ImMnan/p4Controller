@@ -41,7 +41,7 @@ func ServersRead() ([]ServerJSON, error) {
 		return nil, fmt.Errorf("failed to run p4 command: %w", err)
 	}
 
-	// Check if the output is empty
+	// Check if the output is empty, this will be empty when the p4 server is the only server.
 	if len(output) == 0 {
 		return nil, fmt.Errorf("p4 command returned no output")
 	}
