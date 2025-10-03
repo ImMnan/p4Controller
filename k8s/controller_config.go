@@ -23,6 +23,7 @@ type ServerConfig struct {
 	Address     string     `yaml:"address"`  // P4C:Port
 	Description string     `yaml:"description"`
 	InitConfig  InitConfig `yaml:"initConfig"`
+	SvcIPPort   string     `yaml:"svcIPPort"`
 	// DistributedConfig string     `yaml:"distributedConfig"`
 }
 
@@ -179,3 +180,25 @@ func ConfigDeleter(cs *ClientSet, config Config) error {
 	fmt.Println("Config entry deleted successfully.")
 	return nil
 }
+
+//func configFinalize(config Config, cs *ClientSet) Config {
+//	// Rearrange the config map entries if needed
+//	// Currently, this function does nothing and returns the config as is
+//	ns := os.Getenv("WORKING_NAMESPACE")
+//	if ns == "" {
+//		ns = "default"
+//	}
+//	// List StatefulSets with label selectors
+//
+//	labelSelector := "app=p4d,managed-by=p4controller"
+//	stss, err := cs.AppsV1().StatefulSets(ns).List(context.Background(), metav1.ListOptions{
+//		LabelSelector: labelSelector,
+//	})
+//	if err != nil {
+//		return Config{}, fmt.Errorf("failed to list StatefulSets: %w", err)
+//	}
+//	return config
+//
+//	//
+//
+//}
