@@ -39,6 +39,7 @@ func syncP4Config(config k8s.Config) (SyncConfig, error) {
 			if sc.StsName == stsName {
 				found = true
 				break
+
 			}
 		}
 		if !found {

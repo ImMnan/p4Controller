@@ -50,6 +50,8 @@ func p4Controller() {
 				time.Sleep(120 * time.Second)
 				continue
 			}
+			chK8sToP4c <- k8sConfig // Send to CH2
+
 			initObj, delObj, err := k8s.SyncConfig(k8sConfig, cs)
 			if err != nil {
 				fmt.Println("SyncConfig error:", err)
@@ -62,8 +64,6 @@ func p4Controller() {
 				time.Sleep(120 * time.Second)
 				continue
 			}
-
-			chK8sToP4c <- k8sConfig // Send to CH2
 
 			SyncConfig := <-chP4cToK8s // Receive from CH2
 
