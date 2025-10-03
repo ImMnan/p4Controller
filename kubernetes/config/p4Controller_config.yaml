@@ -13,6 +13,7 @@ data:
         stsName: p4d-state
         podType: master
         podPort: 4232
+        svcIPPort: 34.118.233.63:4232
         services: commit-server
         type: server
         address: p4d-state-0:4232
